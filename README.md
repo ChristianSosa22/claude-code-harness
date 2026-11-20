@@ -28,7 +28,7 @@ flowchart LR
     guard["guard_bash.py<br/>PreToolUse hook"]
   end
 
-  hub["SonarQube hub<br/>scan.sh (optional)"]
+  hub["sonar/ kit<br/>local SonarQube (optional)"]
 
   user -- "install.sh links" --> home
   tools -- "install.sh links" --> bin
@@ -48,8 +48,8 @@ flowchart LR
 
 Each new session reads the harness through the links in `~/.claude`, so an edit in this repository
 reaches every project. The main session sends each command to the guard, each group of `tasks.md` to
-the reviewer, and each high-complexity task to the wiseman. The SonarQube hub is outside this
-repository.
+the reviewer, and each high-complexity task to the wiseman. The `sonar/` kit runs a local SonarQube
+server for the optional gate.
 
 ## Contents
 
@@ -63,6 +63,7 @@ repository.
 | `user/hooks/test_guard_bash.py` | Tests of the guard | none |
 | `user/output-styles/asd-ste100.md` | Simplified Technical English output style | `~/.claude/output-styles/` |
 | `tools/sonar-group.mjs` | Optional SonarQube gate of a `tasks.md` group: blocks only the issues on the lines that the staged diff adds | `~/.local/bin/sonar-group` |
+| `sonar/` | Optional local SonarQube kit: the server, the scan script that `sonar-group` calls, and an example config | `SONAR_HUB` |
 | `project-template/` | `CLAUDE.md`, `openspec/config.yaml`, and the harness metrics for a new repository | copied by `new-project.sh` |
 | `experiments/harness-v2.md` | One session per `tasks.md` group. Under test, not in the template. | none |
 
@@ -83,6 +84,7 @@ The guard writes its log to `~/.claude/hooks/guard-bash.log.jsonl`, outside this
 - Claude Code.
 - `python3` for the guard hook.
 - Node.js 22 or later for `sonar-group` and the harness metrics.
+- Docker, `jq`, and `curl` for the `sonar/` kit.
 - [OpenSpec](https://github.com/Fission-AI/OpenSpec) for the project template.
 
 ## Install on a machine
@@ -120,8 +122,9 @@ git add -A
 sonar-group <project-key> --version <change>-g<N>
 ```
 
-This repository does not include the SonarQube server or its scan script. You supply a folder (the
-"hub") that has an executable `scan.sh` with this contract:
+The `sonar/` folder is a ready hub: set `SONAR_HUB` to it and follow `sonar/README.md` to start the
+server and make the tokens. You can also supply your own hub folder. It must have an executable `scan.sh` with this
+contract:
 
 - Arguments: `scan.sh <project-key> <repository-root> <version>`.
 - It analyzes the repository with `sonar-scanner` and sends the analysis to the server.
@@ -133,7 +136,7 @@ The project key must exist on the server, with the quality profile and the excep
 
 | Variable | Required | Default |
 |---|---|---|
-| `SONAR_HUB` | yes | none: the hub folder, the one that has `scan.sh` |
+| `SONAR_HUB` | yes | none: the hub folder, the one that has `scan.sh`, for example `<clone>/sonar` |
 | `SONAR_TOKEN_FILE` | no | `~/.config/sonar-group/token`: a file with a SonarQube analysis token |
 | `SONAR_HOST_URL` | no | `http://127.0.0.1:9000` |
 

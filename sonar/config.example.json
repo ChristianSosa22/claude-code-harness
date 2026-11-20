@@ -1,0 +1,67 @@
+{
+  "_comment": "Copy to sonar/config.json (ignored by git) or to a path in SONAR_CONFIG. Edit here, then run apply.sh again. Never put a token or a password in this file.",
+  "server": {
+    "_comment": "SonarQube Community 26.10.0.133078, pinned by digest. Do not change container or volumes on a server with data: new volume names start an empty server.",
+    "image": "sonarqube@sha256:aa0d41212704d1ed35f7ae3b49886b39f639590baf8020cdb191c2a2eb8f9eae",
+    "container": "sonarqube-local",
+    "bind": "127.0.0.1",
+    "port": 9000,
+    "volumes": [
+      "sonarqube_local_data:/opt/sonarqube/data",
+      "sonarqube_local_extensions:/opt/sonarqube/extensions",
+      "sonarqube_local_logs:/opt/sonarqube/logs"
+    ]
+  },
+  "scanner": {
+    "_comment": "sonar-scanner CLI 8.1.0.6389, pinned by digest. Raise memory and node_maxspace_mb together if a scan runs out of memory.",
+    "image": "sonarsource/sonar-scanner-cli@sha256:47956b669bf486bdad919e1cbd0533223515aa0b6d1d31763e5a3754942df6d7",
+    "memory": "4g",
+    "node_maxspace_mb": 3072,
+    "arm64": {
+      "context": "scanner-arm64",
+      "repository": "local/sonar-scanner-arm64"
+    }
+  },
+  "profile": {
+    "name": "Harness (TS)",
+    "language": "ts",
+    "parent": "Sonar way",
+    "repository": "typescript",
+    "rules": [
+      { "rule": "S134", "params": "maximumNestingLevel=3" },
+      { "rule": "S104", "params": "maximum=1000" },
+      { "rule": "S1067", "params": "max=3" }
+    ],
+    "deactivated_rules": []
+  },
+  "gate": {
+    "name": "Harness gate",
+    "conditions": [
+      { "metric": "new_violations", "op": "GT", "error": "0" },
+      { "metric": "new_security_hotspots_reviewed", "op": "LT", "error": "100" },
+      { "metric": "new_duplicated_lines_density", "op": "GT", "error": "3" }
+    ],
+    "_comment_remove": "SonarQube adds a coverage condition to each new gate. Remove it if the projects send no coverage report.",
+    "remove_metrics": ["new_coverage", "coverage"]
+  },
+  "defaults": {
+    "sources": "src",
+    "tests": "tests",
+    "test_inclusions": "tests/**,**/*.test.ts,**/*.spec.ts",
+    "exclusions": "**/node_modules/**,**/dist/**,**/coverage/**,**/*.test.ts,**/*.spec.ts",
+    "tsconfig": "tsconfig.json",
+    "new_code_period": "PREVIOUS_VERSION",
+    "issue_exclusions": []
+  },
+  "projects": {
+    "_comment": "Each project gets the defaults merged with its entry. extra_issue_exclusions adds to the default issue_exclusions.",
+    "example-app": {},
+    "claude-code-harness": {
+      "sources": "tools,user/hooks,sonar",
+      "tests": "tools,user/hooks",
+      "test_inclusions": "**/*.test.mjs,**/test_*.py",
+      "exclusions": "**/*.test.mjs,**/test_*.py",
+      "tsconfig": ""
+    }
+  }
+}
