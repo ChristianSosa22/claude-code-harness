@@ -1,0 +1,71 @@
+schema: spec-driven
+
+context: |
+  Language: en
+  All artifacts must be written in en.
+  Keep OpenSpec structural headings and SHALL/MUST keywords in English.
+
+  ## Project
+  <What the project does, for whom, and the epic or the tickets that cover it.>
+
+  ## Data sources
+  <Each external system: authentication, the endpoints in use, the measured rate limits, and the
+  date of the measurement.>
+
+  ## Decisions made
+  <Each decision with its date and where it lives (ADR or archived design).>
+
+  ## Open decisions that affect the design
+  <List.>
+
+  ## Plan of changes (build order)
+  <C1 name -> C2 name -> ...>
+
+  ## Constraints
+  <Sensitive data, compliance, what never goes to logs.>
+
+rules:
+  proposal:
+    - Say which tickets of the issue tracker the change covers and which stay out
+    - Include an "Out of scope" section
+  design:
+    - Record each decision with the rejected alternative and the reason
+    - >-
+      A change with screens says how it meets each rule of the project UX guide that applies, and
+      names the pattern that it uses (for example, APG Disclosure for a panel that a button opens)
+    - >-
+      End with a "Guide for the implementer" section with the decisions already made that an agent
+      without context needs so that it does not choose: folder structure, names of modules and
+      functions, shape of the data and of the events, allowed libraries, and what is forbidden
+  specs:
+    - >-
+      Each screen requirement says how the user sees that a mode is active, how to leave it, which
+      fields go together and which apart, which controls do not apply in that mode, the state of
+      slow actions, and where each error goes; each point that applies is one line of a scenario
+  tasks:
+    - >-
+      tasks.md is the progress list of the change: groups per capability or resource, with check
+      boxes that the implementer marks when each item closes and extends with what they discover.
+      It is not a script per task: the names, the signatures, and the folder structure are already
+      in the "Guide for the implementer" of the design
+    - Each item names the file or the resource that it touches and the spec whose scenarios it covers
+    - >-
+      Each spec of the change has at least one test item that covers all its scenarios, with the
+      name of the scenario as the text of the test; the close of the change runs the coverage with
+      the threshold of the project
+    - >-
+      Each code group has a "Local test" item that proves, without the live environment, what runs
+      when deployed (bundled handler, environment variables, events)
+    - >-
+      Mark with [critical] the items that touch permissions, secrets, or sensitive data; show their
+      diff to the project owner before you close them
+    - >-
+      Items that touch a live environment (deploy, apply, manual runs, contract tests) and items of
+      the issue tracker run only with the confirmation of the project owner, never on their own
+    - >-
+      The first task of the change moves to In Progress the tickets that the proposal declares as
+      covered, with a comment that links the proposal
+    - >-
+      The last task of the change moves those tickets to Done (or keeps them In Progress if the
+      change covers them in part) with a comment that lists each difference between what was built
+      and the description of the ticket, or says explicitly that there was no difference
